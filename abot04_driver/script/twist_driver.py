@@ -58,7 +58,10 @@ class Abot04TwistDriver():
         except AttributeError as error:
             # Output expected AttributeErrors.
             rospy.signal_shutdown(error)
-            
+        except KeyboardInterrupt:
+            self.odrv0.axis0.requested_state = AXIS_STATE_IDLE
+            self.odrv0.axis1.requested_state = AXIS_STATE_IDLE
+            rospy.signal_shutdown("KeyboardInterrupt")
             
 if __name__ == '__main__':
     rospy.init_node("abot04_twist_driver",disable_signals=True)

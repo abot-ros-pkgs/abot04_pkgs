@@ -4,6 +4,7 @@ from geometry_msgs.msg import Twist
 import odrive
 from odrive.enums import *
 import math as m
+import sys
 
 class Abot04TwistDriver():
     def __init__(self):
@@ -35,6 +36,10 @@ class Abot04TwistDriver():
         print("Initialized")
 
     def TwistCB(self, data):
+        # Check if the odrv0 is able to use
+        if self.odrv0 is None:
+            sys.exit(1)
+        
         target_linear = data.linear.x
         target_angular = data.angular.z
         # Bounds check
@@ -47,10 +52,15 @@ class Abot04TwistDriver():
         left_speed = target_linear - (self.tread/2.)*target_angular
         right_pulse = right_speed/(m.pi*self.right_wheel_radius)*900.
         left_pulse = left_speed/(m.pi*self.left_wheel_radius)*900.
-        self.odrv0.axis0.controller.vel_setpoint = -right_pulse
-        self.odrv0.axis1.controller.vel_setpoint = left_pulse
-        
+        try:
+            self.odrv0.axis0.controller.vel_setpoint = -right_pulse
+            self.odrv0.axis1.controller.vel_setpoint = left_pulse
+        except AttributeError as error:
+            # Output expected AttributeErrors.
+            rospy.signal_shutdown(error)
+            
+            
 if __name__ == '__main__':
-    rospy.init_node("abot04_twist_driver")
+    rospy.init_node("abot04_twist_driver",disable_signals=True)
     atd = Abot04TwistDriver()
     rospy.spin()

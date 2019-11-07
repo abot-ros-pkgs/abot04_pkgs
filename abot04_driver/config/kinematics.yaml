@@ -1,0 +1,6 @@
+abot04:
+  right:
+    wheel_radius: 0.43
+  left:
+    wheel_radius: 0.43
+  tread: 0.5

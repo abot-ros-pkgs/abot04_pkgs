@@ -1,0 +1,7 @@
+abot04:
+  linear:
+    vel_limit: 6.0
+    acc_limit: 3.0
+  angular:
+    vel_limit: 6.28
+    acc_limit: 3.14

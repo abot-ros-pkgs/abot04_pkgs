@@ -1,10 +1,8 @@
 #!/bin/bash
-
-export ROS_MASTER_URI=http://192.168.100.10:11311
-export ROS_HOST_NAME=192.168.100.10
-export ROS_IP=192.168.100.10
+echo "Start param loading"
 rosparam load `rospack find abot04_driver`/config/controll.yaml
 rosparam load `rospack find abot04_driver`/config/kinematics.yaml
+echo "Start driver"
 while true
 do
     python3 `rospack find abot04_driver`/script/twist_driver.py

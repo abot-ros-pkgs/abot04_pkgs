@@ -1,7 +1,10 @@
 abot04:
   linear:
-    vel_limit: 6.0
-    acc_limit: 3.0
+    vel_limit: 1.67
   angular:
     vel_limit: 6.28
-    acc_limit: 3.14
+  right:
+    acc_limit: 0.15
+  left:
+    acc_limit: 0.15
+    

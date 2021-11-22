@@ -1,0 +1,15 @@
+joint:
+  names: [front, back]
+motion:
+  names: [center1, down, center2]
+  center1:
+    step: [-3.141592653589793, 3.141592653589793]
+    time_from_start: 0
+  down:
+    step: [-2.705260340591211, 2.705260340591211]
+    time_from_start: 0.15
+  center2:
+    step: [-3.141592653589793, 3.141592653589793]
+    time_from_start: 0.3
+      
+

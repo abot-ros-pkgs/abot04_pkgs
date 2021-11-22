@@ -1,0 +1,21 @@
+joint:
+  names: [front, back]
+motion:
+  names: [up1, center1, down, center2, up2]
+  up1:
+    step: [-3.71, 3.71]  # radian
+    time_from_start: 0  # sec
+  center1:
+    step: [-3.14, 3.14]
+    time_from_start: 0.25
+  down:
+    step: [-2.57, 2.57]
+    time_from_start: 0.5
+  center2:
+    step: [-3.14, 3.14]
+    time_from_start: 0.75
+  up2:
+    step: [-3.71, 3.71]
+    time_from_start: 1.0
+      
+

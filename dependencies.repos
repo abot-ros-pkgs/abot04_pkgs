@@ -1,0 +1,4 @@
+- git:
+    local-name: RyodoTanaka/joy_twist
+    uri: git@github.com:RyodoTanaka/joy_twist.git
+    version: master

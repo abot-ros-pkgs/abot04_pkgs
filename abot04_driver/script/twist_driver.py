@@ -11,17 +11,17 @@ class Abot04TwistDriver():
     def __init__(self):
         # Odrive setup
         while True:
-            print("Openning ODrive....")
+            rospy.loginfo("Openning ODrive....")
             self.odrv0 = odrive.find_any()
             if self.odrv0 is not None:
-                print("ODrive is Opened !!")
+                rospy.loginfo("ODrive is Opened !!")
                 break
             else:
                 print("Failed to open ODrive...Try Again!!")
         self.odrv0.axis0.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
         self.odrv0.axis1.requested_state = AXIS_STATE_CLOSED_LOOP_CONTROL
-        self.odrv0.axis0.controller.vel_setpoint = 0
-        self.odrv0.axis1.controller.vel_setpoint = 0
+        self.odrv0.axis0.controller.input_vel = 0
+        self.odrv0.axis1.controller.input_vel = 0
         # subscriber
         rospy.Subscriber("cmd_vel", Twist, self.TwistCB)
         # publisher
@@ -32,42 +32,38 @@ class Abot04TwistDriver():
         self.tread = rospy.get_param("/abot04/tread")
         self.linear_vel_limit = rospy.get_param("/abot04/linear/vel_limit")
         self.angular_vel_limit = rospy.get_param("/abot04/angular/vel_limit")
-        self.right_acc_limit = rospy.get_param("/abot04/right/acc_limit")
-        self.left_acc_limit = rospy.get_param("/abot04/left/acc_limit")
         self.last_right_vel = 0.0
         self.last_left_vel = 0.0
         self.target_linear_vel = 0.0
         self.target_angular_vel = 0.0
         self.odom = Vector3()
-        self.right_pos = -self.odrv0.axis0.encoder.pos_estimate/900.*m.pi*self.right_wheel_radius
-        self.left_pos = self.odrv0.axis1.encoder.pos_estimate/900.*m.pi*self.left_wheel_radius
+        self.right_pos = -self.odrv0.axis0.encoder.pos_estimate*m.pi*self.right_wheel_radius
+        self.left_pos = self.odrv0.axis1.encoder.pos_estimate*m.pi*self.right_wheel_radius
         self.last_right_pos = self.right_pos
         self.last_left_pos = self.left_pos
-        print("Initialized")
+        rospy.loginfo("Initialized")
 
     def control(self):
         rate = rospy.Rate(50)
         while not rospy.is_shutdown():
-            # Calculate each velocity
+            # Calculate each velocity m/sec
             (right_vel,left_vel) = self.calcEachVel(self.target_linear_vel,self.target_angular_vel)
-            # convert to pulse
-            right_pulse = right_vel/(m.pi*self.right_wheel_radius)*900.
-            left_pulse = left_vel/(m.pi*self.left_wheel_radius)*900.
+            # convert to round/sec
+            right_rps = right_vel/(m.pi*self.right_wheel_radius)
+            left_rps = left_vel/(m.pi*self.left_wheel_radius)
             try:
                 # Get current position
-                self.right_pos = -self.odrv0.axis0.encoder.pos_estimate/900.0*m.pi*self.right_wheel_radius
-                self.left_pos = self.odrv0.axis1.encoder.pos_estimate/900.0*m.pi*self.left_wheel_radius
+                self.right_pos = -self.odrv0.axis0.encoder.pos_estimate*m.pi*self.right_wheel_radius
+                self.left_pos = self.odrv0.axis1.encoder.pos_estimate*m.pi*self.right_wheel_radius
+
                 right_pos_diff = self.right_pos - self.last_right_pos
                 left_pos_diff = self.left_pos - self.last_left_pos
                 self.calcOdom(right_pos_diff, left_pos_diff)
 
                 # Set velocity
-                self.odrv0.axis0.controller.vel_setpoint = -right_pulse
-                self.odrv0.axis1.controller.vel_setpoint = left_pulse
+                self.odrv0.axis0.controller.input_vel = -right_rps
+                self.odrv0.axis1.controller.input_vel = left_rps
 
-                # Update velocity
-                self.last_right_vel = -self.odrv0.axis0.encoder.vel_estimate/900.0*m.pi*self.right_wheel_radius
-                self.last_left_vel = self.odrv0.axis1.encoder.vel_estimate/900.0*m.pi*self.left_wheel_radius
                 # Update last pos
                 self.last_right_pos = self.right_pos
                 self.last_left_pos = self.left_pos
@@ -91,13 +87,6 @@ class Abot04TwistDriver():
         # Convert to each vel
         right_vel = target_linear + (self.tread/2.)*target_angular
         left_vel = target_linear - (self.tread/2.)*target_angular
-        # Acc bounds check
-        right_acc = right_vel - self.last_right_vel
-        left_acc = left_vel - self.last_left_vel
-        if abs(right_acc) > self.right_acc_limit :
-            right_vel = self.last_right_vel + right_acc/abs(right_acc)*self.right_acc_limit
-        if abs(left_acc) > self.left_acc_limit :
-            left_vel = self.last_left_vel + left_acc/abs(left_acc)*self.left_acc_limit
         return (right_vel, left_vel)
                 
     def calcOdom(self,right_delta_dist, left_delta_dist):
@@ -127,5 +116,3 @@ if __name__ == '__main__':
     atd = Abot04TwistDriver()
     atd.control()
     rospy.spin()
-
-

@@ -2,12 +2,23 @@
 Abot04 ROS packages
 
 ## Environment
-OS : Ubuntu 20.04 LTS
-ROS : noetic
-ROS2 : NaN
+- OS : Ubuntu 20.04 LTS
+- ROS : noetic
+- ROS2 : Not supported
+- Python: 3.8.0
+- Odrive : python3 odrive == 0.6.3.post0
 
 
 ## Installation
+### Odrive Setup
+```
+sudo apt install python3 python3-pip
+pip3 install matplotlib
+pip3 install --upgrade odrive # or pip3 install odrive==0.6.3.post0
+sudo bash -c "curl https://cdn.odriverobotics.com/files/odrive-udev-rules.rules > /etc/udev/rules.d/91-odrive.rules && udevadm control --reload-rules && udevadm trigger"
+```
+Then restart you PC.
+
 ```bash
 mkdir -p <catkin_ws>/src
 cd <catkin_ws>/src
